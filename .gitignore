@@ -1,0 +1,25 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+.env
+.env.*
+!.env.example
+.env.save
+
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+.DS_Store
+.Rhistory
+mongo_backup/
+
+# Local backup files
+backups/
+*.bak
+*.save
+
+# Local backup files
+*.before-*
+*.before-*.*

@@ -1,0 +1,50 @@
+[
+  {
+    "employee_id": "E001",
+    "name": "Asha Rao",
+    "email": "asha.rao@example.com",
+    "department": "Engineering",
+    "shift_start": "09:00",
+    "shift_end": "18:00"
+  },
+  {
+    "employee_id": "E002",
+    "name": "Vikram Singh",
+    "email": "vikram.singh@example.com",
+    "department": "Engineering",
+    "shift_start": "10:00",
+    "shift_end": "19:00"
+  },
+  {
+    "employee_id": "E003",
+    "name": "Priya Nair",
+    "email": "priya.nair@example.com",
+    "department": "Sales",
+    "shift_start": "09:30",
+    "shift_end": "18:30"
+  },
+  {
+    "employee_id": "E004",
+    "name": "Rahul Mehta",
+    "email": "rahul.mehta@example.com",
+    "department": "Sales",
+    "shift_start": "09:00",
+    "shift_end": "18:00"
+  },
+  {
+    "employee_id": "E005",
+    "name": "Sana Khan",
+    "email": "sana.khan@example.com",
+    "department": "Support",
+    "shift_start": "08:00",
+    "shift_end": "17:00"
+  },
+  {
+    "employee_id": "E006",
+    "name": "Dev Patel",
+    "email": "dev.patel@example.com",
+    "department": "Support",
+    "shift_start": "12:00",
+    "shift_end": "21:00"
+  }
+]

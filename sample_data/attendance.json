@@ -1,0 +1,26 @@
+[
+  {
+    "employee_id": "E001",
+    "punch_in": "2026-10-05T09:05:00Z",
+    "punch_out": "2026-10-05T18:10:00Z",
+    "note": "on time"
+  },
+  {
+    "employee_id": "E001",
+    "punch_in": "2026-10-06T09:40:00Z",
+    "punch_out": "2026-10-06T20:30:00Z",
+    "note": "late + overtime"
+  },
+  {
+    "employee_id": "E003",
+    "punch_in": "2026-10-05T09:28:00Z",
+    "punch_out": "2026-10-05T17:00:00Z",
+    "note": "on time, short day"
+  },
+  {
+    "employee_id": "E005",
+    "punch_in": "2026-10-05T22:00:00Z",
+    "punch_out": "2026-10-06T06:00:00Z",
+    "note": "overnight shift"
+  }
+]
