@@ -377,6 +377,28 @@ def list_employees(
     }
 
 
+@app.get("/employees/me")
+def get_my_employee_profile(current_user=Depends(get_current_user)):
+    if current_user.get("role") != "employee":
+        raise HTTPException(
+            status_code=403,
+            detail="This endpoint is for employee accounts only.",
+        )
+
+    emp_code = current_user.get("emp_code")
+    if not emp_code:
+        raise HTTPException(status_code=403, detail="Employee code is missing.")
+
+    db = get_db()
+    authorize_employee_access(emp_code, current_user, db)
+    employee = db.employees.find_one({"emp_code": emp_code})
+
+    if not employee:
+        raise HTTPException(status_code=404, detail="Employee profile not found.")
+
+    return employee_out(employee)
+
+
 @app.post("/attendance/punch-in", status_code=201)
 def punch_in(body: PunchIn, current_user=Depends(get_current_user)):
     db = get_db()

@@ -69,6 +69,11 @@ function App() {
   const [leaderboardSort, setLeaderboardSort] = useState('desc')
   const [attendanceLoading, setAttendanceLoading] = useState(true)
   const [attendanceError, setAttendanceError] = useState('')
+  const [employeeProfile, setEmployeeProfile] = useState(null)
+  const [profileLoading, setProfileLoading] = useState(false)
+  const [punchLoading, setPunchLoading] = useState(false)
+  const [punchMessage, setPunchMessage] = useState('')
+  const [punchError, setPunchError] = useState('')
 
     const handleLogin = async (event) => {
     event.preventDefault()
@@ -280,6 +285,75 @@ function App() {
       .catch(() => setAttendanceError('Unable to load attendance records.'))
       .finally(() => setAttendanceLoading(false))
   }, [attendancePage, search, authReady, token])
+
+  useEffect(() => {
+    if (!authReady || !token || currentUser?.role !== 'employee') {
+      setEmployeeProfile(null)
+      return
+    }
+
+    let cancelled = false
+    setProfileLoading(true)
+
+    axios.get(`${API_URL}/employees/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(response => {
+        if (!cancelled) setEmployeeProfile(response.data)
+      })
+      .catch(error => {
+        if (!cancelled) {
+          setPunchError(
+            error.response?.data?.detail || 'Unable to load your employee profile.'
+          )
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setProfileLoading(false)
+      })
+
+    return () => { cancelled = true }
+  }, [authReady, token, currentUser?.role])
+
+  const refreshMyAttendance = async () => {
+    const response = await axios.get(`${API_URL}/attendance`, {
+      params: { page: 1, page_size: 5 },
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    setAttendanceRecords(response.data.items || [])
+    setAttendanceTotal(response.data.total || 0)
+  }
+
+  const handlePunch = async (action) => {
+    const empCode = employeeProfile?.emp_code || currentUser?.emp_code
+    if (!empCode || punchLoading) return
+
+    setPunchLoading(true)
+    setPunchMessage('')
+    setPunchError('')
+
+    try {
+      const response = await axios.post(
+        `${API_URL}/attendance/${action}`,
+        { emp_code: empCode },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+
+      await refreshMyAttendance()
+      setPunchMessage(
+        action === 'punch-in'
+          ? `Punch In recorded at ${formatTime(response.data.punch_in)}.`
+          : `Punch Out recorded at ${formatTime(response.data.punch_out)}.`
+      )
+    } catch (error) {
+      setPunchError(
+        error.response?.data?.detail ||
+        `Unable to ${action === 'punch-in' ? 'punch in' : 'punch out'}. Please try again.`
+      )
+    } finally {
+      setPunchLoading(false)
+    }
+  }
 
   const today = new Date()
   const todayKey = [
@@ -494,7 +568,139 @@ function App() {
             <div className="flex items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600"><CalendarCheck size={17} className="text-blue-600"/>{new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
           </section>
 
-          {active === 'Dashboard' ? <>
+          {active === 'Dashboard' && currentUser?.role === 'employee' ? (
+            <section className="space-y-6">
+              <div className="rounded-2xl bg-gradient-to-r from-blue-700 to-indigo-600 p-6 text-white shadow-lg">
+                <p className="text-sm text-blue-100">Employee self-service</p>
+                <h2 className="mt-2 text-2xl font-bold">
+                  Welcome, {employeeProfile?.name || currentUser?.email?.split('@')[0] || 'Employee'}
+                </h2>
+                <p className="mt-2 text-sm text-blue-100">
+                  {employeeProfile?.emp_code || currentUser?.emp_code || 'Employee code'}
+                  {employeeProfile?.department ? ` · ${employeeProfile.department}` : ''}
+                </p>
+              </div>
+
+              {punchError && (
+                <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                  {String(punchError)}
+                </p>
+              )}
+              {punchMessage && (
+                <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
+                  {punchMessage}
+                </p>
+              )}
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <p className="text-sm text-slate-500">Today's attendance</p>
+                  <p className="mt-2 text-2xl font-bold text-slate-900">
+                    {attendanceLoading ? 'Loading...' :
+                      (attendanceRecords.find(item => item.date === todayKey)?.status || 'Not punched in')}
+                  </p>
+                  <p className="mt-2 text-sm text-slate-500">
+                    Punch In: {formatTime(attendanceRecords.find(item => item.date === todayKey)?.punch_in)}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Punch Out: {formatTime(attendanceRecords.find(item => item.date === todayKey)?.punch_out)}
+                  </p>
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      disabled={punchLoading || profileLoading || !employeeProfile?.emp_code || Boolean(attendanceRecords.find(item => item.date === todayKey))}
+                      onClick={() => handlePunch('punch-in')}
+                      className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {punchLoading ? 'Processing...' : 'Punch In'}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={punchLoading || !attendanceRecords.find(item => item.date === todayKey && item.punch_in && !item.punch_out)}
+                      onClick={() => handlePunch('punch-out')}
+                      className="rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {punchLoading ? 'Processing...' : 'Punch Out'}
+                    </button>
+                  </div>
+                  <p className="mt-3 text-xs text-slate-400">
+                    Punch buttons become available according to today's recorded attendance.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                  <h3 className="font-bold text-slate-900">My Profile</h3>
+                  {profileLoading ? (
+                    <p className="mt-4 text-sm text-slate-500">Loading profile...</p>
+                  ) : (
+                    <dl className="mt-4 space-y-4 text-sm">
+                      <div>
+                        <dt className="text-slate-500">Full name</dt>
+                        <dd className="mt-1 font-medium text-slate-900">{employeeProfile?.name || '—'}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-slate-500">Email</dt>
+                        <dd className="mt-1 break-all font-medium text-slate-900">{employeeProfile?.email || currentUser?.email || '—'}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-slate-500">Department</dt>
+                        <dd className="mt-1 font-medium text-slate-900">{employeeProfile?.department || '—'}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-slate-500">Employee code</dt>
+                        <dd className="mt-1 font-medium text-slate-900">{employeeProfile?.emp_code || '—'}</dd>
+                      </div>
+                      <div>
+                        <dt className="text-slate-500">Shift timing</dt>
+                        <dd className="mt-1 font-medium text-slate-900">
+                          {employeeProfile?.shift_start || '—'} – {employeeProfile?.shift_end || '—'}
+                        </dd>
+                      </div>
+                    </dl>
+                  )}
+                </div>
+              </div>
+
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div className="p-6">
+                  <h3 className="font-bold text-slate-900">My Recent Attendance</h3>
+                  <p className="mt-1 text-sm text-slate-500">Your latest attendance records</p>
+                </div>
+                {attendanceLoading ? (
+                  <p className="px-6 pb-6 text-sm text-slate-500">Loading attendance...</p>
+                ) : attendanceError ? (
+                  <p role="alert" className="px-6 pb-6 text-sm text-red-600">{attendanceError}</p>
+                ) : attendanceRecords.length === 0 ? (
+                  <p className="px-6 pb-6 text-sm text-slate-500">No attendance records found yet.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm">
+                      <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+                        <tr>
+                          <th className="px-6 py-3">Date</th>
+                          <th className="px-6 py-3">Status</th>
+                          <th className="px-6 py-3">Punch In</th>
+                          <th className="px-6 py-3">Punch Out</th>
+                          <th className="px-6 py-3">Hours</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {attendanceRecords.map((item, index) => (
+                          <tr key={`${item.date}-${index}`}>
+                            <td className="px-6 py-4">{item.date}</td>
+                            <td className="px-6 py-4">{item.status || '—'}</td>
+                            <td className="px-6 py-4">{formatTime(item.punch_in)}</td>
+                            <td className="px-6 py-4">{formatTime(item.punch_out)}</td>
+                            <td className="px-6 py-4">{item.work_hours == null ? '—' : `${item.work_hours} h`}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </section>
+          ) : active === 'Dashboard' ? <>
             <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {displayStats.map(({ title, value, note, icon: Icon, color }) => (
                 <div key={title} className="group rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm shadow-slate-200/50 transition-all duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg hover:shadow-slate-200/60">
