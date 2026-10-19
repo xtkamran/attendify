@@ -335,8 +335,9 @@ def create_employee(
     doc["created_at"] = utc_second(datetime.now(UTC))
     try:
         db.employees.insert_one(doc)
-    except DuplicateKeyError:
-        error(409, "Employee already exists")
+    except DuplicateKeyError as exc:
+        print(f"Duplicate employee insert details: {exc.details}", flush=True)
+        error(409, "Duplicate employee code or another unique constraint")
     return employee_out(doc)
 
 
