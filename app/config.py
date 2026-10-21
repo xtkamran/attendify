@@ -18,7 +18,7 @@ class Settings(BaseSettings):
 
     # Assignment rules
     timezone: str = "Asia/Kolkata"
-    late_grace_minutes: int = 10
+    late_grace_minutes: int = 30
     max_session_minutes: int = 960
     min_session_minutes: int = 5
 

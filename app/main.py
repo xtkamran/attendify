@@ -14,6 +14,7 @@ from pymongo.errors import DuplicateKeyError
 
 from . import __version__
 from .database import connect_to_mongo, close_mongo_connection, get_db
+from app.config import get_settings
 from app.auth_routes import router as auth_router
 from app.auth import get_current_user, require_role
 
@@ -200,8 +201,10 @@ def calculate(record, employee):
     result["punch_in"] = pi
     shift_start, shift_end = shift_bounds(result["date"], employee)
 
-    if pi > shift_start + timedelta(minutes=10):
+    grace_minutes = get_settings().late_grace_minutes
+    if pi > shift_start + timedelta(minutes=grace_minutes):
         result["late_minutes"] = int((pi - shift_start).total_seconds() // 60)
+        result["half_day"] = True
 
     if po:
         duration = (po - pi).total_seconds()
@@ -209,7 +212,7 @@ def calculate(record, employee):
             error(422, "punch_out must be after punch_in and within 24 hours")
         result["punch_out"] = po
         result["work_hours"] = r2(duration / 3600)
-        result["half_day"] = result["work_hours"] < 4.50
+        result["half_day"] = result["half_day"] or result["work_hours"] < 4.50
         overtime = int((po - shift_end).total_seconds() // 60)
         result["overtime_minutes"] = overtime if overtime >= 30 else 0
     return result
