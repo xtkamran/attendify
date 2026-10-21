@@ -405,6 +405,28 @@ function App() {
     ? new Date(value).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
     : '—'
 
+  const formatWorkDuration = item => {
+    if (!item.punch_in || !item.punch_out) return '—'
+
+    const start = new Date(item.punch_in).getTime()
+    const end = new Date(item.punch_out).getTime()
+
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) {
+      return '—'
+    }
+
+    const totalSeconds = Math.floor((end - start) / 1000)
+    if (totalSeconds < 60) return `${totalSeconds} sec`
+
+    const totalMinutes = Math.floor(totalSeconds / 60)
+    const hours = Math.floor(totalMinutes / 60)
+    const minutes = totalMinutes % 60
+
+    if (hours && minutes) return `${hours} h ${minutes} min`
+    if (hours) return `${hours} h`
+    return `${minutes} min`
+  }
+
   const tones = {
     blue: 'bg-blue-50 text-blue-600',
     green: 'bg-emerald-50 text-emerald-600',
@@ -691,7 +713,7 @@ function App() {
                             <td className="px-6 py-4">{item.status || '—'}</td>
                             <td className="px-6 py-4">{formatTime(item.punch_in)}</td>
                             <td className="px-6 py-4">{formatTime(item.punch_out)}</td>
-                            <td className="px-6 py-4">{item.work_hours == null ? '—' : `${item.work_hours} h`}</td>
+                            <td className="px-6 py-4">{formatWorkDuration(item)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -1001,7 +1023,7 @@ function App() {
                           {item.late_minutes > 0 && <div className="mt-1 text-xs text-amber-600">{item.late_minutes} min late</div>}
                           {item.half_day && <div className="mt-1 text-xs text-slate-500">Half-day</div>}
                         </td>
-                        <td className="px-5 py-4 text-slate-600">{Number(item.work_hours || 0).toFixed(2)} h</td>
+                        <td className="px-5 py-4 text-slate-600">{formatWorkDuration(item)}</td>
                       </tr>
                     ))}
                   </tbody>
