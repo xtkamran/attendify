@@ -187,6 +187,7 @@ def calculate(record, employee):
     result["work_hours"] = None
     result["late_minutes"] = 0
     result["overtime_minutes"] = 0
+    result["early_departure_minutes"] = 0
     result["half_day"] = False
 
     if status in {"ABSENT", "LEAVE"}:
@@ -213,6 +214,9 @@ def calculate(record, employee):
         result["punch_out"] = po
         result["work_hours"] = r2(duration / 3600)
         result["half_day"] = result["half_day"] or result["work_hours"] < 4.50
+        result["early_departure_minutes"] = max(
+            0, int((shift_end - po).total_seconds() // 60)
+        )
         overtime = int((po - shift_end).total_seconds() // 60)
         result["overtime_minutes"] = overtime if overtime >= 30 else 0
     return result
@@ -242,6 +246,7 @@ def attendance_out(doc):
         "punch_out": ms(doc.get("punch_out")),
         "work_hours": doc.get("work_hours"), "late_minutes": doc.get("late_minutes", 0),
         "overtime_minutes": doc.get("overtime_minutes", 0),
+        "early_departure_minutes": doc.get("early_departure_minutes", 0),
         "half_day": doc.get("half_day", False), "history": history,
     }
 
@@ -537,7 +542,7 @@ def punch_out(body: PunchOut, current_user=Depends(get_current_user)):
     result = db.attendance_logs.update_one(
         {"emp_code": body.emp_code, "date": record["date"], "punch_out": None},
         {"$set": {k: updated[k] for k in
-                  ("punch_out", "work_hours", "late_minutes", "overtime_minutes", "half_day", "updated_at")}},
+                  ("punch_out", "work_hours", "late_minutes", "overtime_minutes", "early_departure_minutes", "half_day", "updated_at")}},
     )
     if result.modified_count != 1:
         error(409, "Attendance was updated concurrently")

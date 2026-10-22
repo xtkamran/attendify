@@ -54,3 +54,21 @@ def test_punch_in_at_1001_am_is_late_and_half_day_even_after_full_shift(
     assert result["late_minutes"] == 31
     assert result["work_hours"] == 8.48
     assert result["half_day"] is True
+
+
+def test_punch_out_at_629_pm_is_one_minute_early():
+    result = attendance(
+        "2026-10-05T04:00:00Z",
+        "2026-10-05T12:59:00Z",
+    )
+
+    assert result["early_departure_minutes"] == 1
+
+
+def test_punch_out_at_630_pm_is_not_early():
+    result = attendance(
+        "2026-10-05T04:00:00Z",
+        "2026-10-05T13:00:00Z",
+    )
+
+    assert result["early_departure_minutes"] == 0

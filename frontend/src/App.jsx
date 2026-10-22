@@ -845,6 +845,7 @@ function App() {
                           'bg-slate-100 text-slate-600'
                         }`}>{item.status.replaceAll('_', ' ')}</span>
                         {item.late_minutes > 0 && <div className="mt-1 text-xs text-amber-600">{item.late_minutes} min late</div>}
+                        {item.early_departure_minutes > 0 && <div className="mt-1 text-xs text-orange-600">{item.early_departure_minutes} min early departure</div>}
                       </td>
                     </tr>
                   ))}
@@ -1021,6 +1022,7 @@ function App() {
                             'bg-amber-50 text-amber-700'
                           }`}>{item.status.replaceAll('_', ' ')}</span>
                           {item.late_minutes > 0 && <div className="mt-1 text-xs text-amber-600">{item.late_minutes} min late</div>}
+                        {item.early_departure_minutes > 0 && <div className="mt-1 text-xs text-orange-600">{item.early_departure_minutes} min early departure</div>}
                           {item.half_day && <div className="mt-1 text-xs text-slate-500">Half-day</div>}
                         </td>
                         <td className="px-5 py-4 text-slate-600">{formatWorkDuration(item)}</td>
