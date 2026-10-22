@@ -497,14 +497,34 @@ def list_attendance(
         employee["emp_code"]: employee
         for employee in db.employees.find(
             {"emp_code": {"$in": employee_codes}},
-            {"_id": 0, "emp_code": 1, "name": 1, "department": 1},
+            {
+                "_id": 0,
+                "emp_code": 1,
+                "name": 1,
+                "department": 1,
+                "shift_start": 1,
+                "shift_end": 1,
+            },
         )
     } if employee_codes else {}
 
     items = []
     for doc in docs:
-        item = attendance_out(doc)
         employee = employees_by_code.get(doc["emp_code"], {})
+        item = attendance_out(doc)
+
+        # Recalculate early departure for the response only.
+        # Do not modify existing database records.
+        punch_out = doc.get("punch_out")
+        if punch_out is not None:
+            _, shift_end = shift_bounds(doc["date"], employee)
+            punch_out = utc_second(punch_out)
+            item["early_departure_minutes"] = max(
+                0, int((shift_end - punch_out).total_seconds() // 60)
+            )
+        else:
+            item["early_departure_minutes"] = 0
+
         item["name"] = employee.get("name")
         item["department"] = employee.get("department")
         items.append(item)
