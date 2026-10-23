@@ -215,7 +215,7 @@ def calculate(record, employee):
         result["work_hours"] = r2(duration / 3600)
         result["half_day"] = result["half_day"] or result["work_hours"] < 4.50
         result["early_departure_minutes"] = max(
-            0, int((shift_end - po).total_seconds() // 60)
+            0, int((shift_end - po).total_seconds() / 60 + 0.5)
         )
         overtime = int((po - shift_end).total_seconds() // 60)
         result["overtime_minutes"] = overtime if overtime >= 30 else 0
@@ -520,7 +520,7 @@ def list_attendance(
             _, shift_end = shift_bounds(doc["date"], employee)
             punch_out = utc_second(punch_out)
             item["early_departure_minutes"] = max(
-                0, int((shift_end - punch_out).total_seconds() // 60)
+                0, int((shift_end - punch_out).total_seconds() / 60 + 0.5)
             )
         else:
             item["early_departure_minutes"] = 0
