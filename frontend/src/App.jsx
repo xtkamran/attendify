@@ -3,7 +3,8 @@ import axios from 'axios'
 import {
   LayoutDashboard, Users, CalendarCheck, ChartNoAxesCombined,
   Settings, Search, Bell, Clock3, UserCheck, UserX,
-  TrendingUp, ChevronDown, Menu
+  TrendingUp, ChevronDown, Menu, ShieldCheck, UserRound,
+  Eye, EyeOff, ArrowRight, Mail, LockKeyhole, UsersRound
 } from 'lucide-react'
 
 const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8002').replace(/\/$/, '')
@@ -29,6 +30,8 @@ function App() {
   )
   const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
+  const [loginRole, setLoginRole] = useState('admin')
+  const [showPassword, setShowPassword] = useState(false)
   const [loginError, setLoginError] = useState('')
   const [loginLoading, setLoginLoading] = useState(false)
   const [authReady, setAuthReady] = useState(false)
@@ -458,25 +461,129 @@ function App() {
   }
 
   if (!token) {
+    const roleIsAdmin = loginRole === 'admin'
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f4f7fc] px-4 py-10">
-        <form onSubmit={handleLogin} className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
-          <div className="mb-6 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white">
-              <CalendarCheck size={26} />
+      <div className="relative min-h-dvh overflow-x-hidden overflow-y-auto bg-[#f7f9ff] text-slate-900 lg:h-dvh lg:overflow-hidden">
+        <div className="pointer-events-none absolute -left-32 -top-32 h-96 w-96 rounded-full bg-blue-100/35 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-40 right-0 h-96 w-96 rounded-full bg-violet-100/35 blur-3xl" />
+
+        <div className="relative mx-auto grid min-h-dvh max-w-[1500px] grid-cols-1 items-center gap-3 p-3 sm:p-4 lg:h-full lg:min-h-0 lg:grid-cols-[0.85fr_1fr] lg:gap-4 lg:p-4 xl:gap-5 xl:p-5">
+          <section className="relative hidden h-full min-h-0 flex-col justify-center overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-[#36558f] via-[#527ac0] to-[#7774df] p-4 text-white shadow-2xl shadow-blue-950/20 lg:flex xl:p-6">
+            <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full border border-white/10 bg-white/5" />
+            <div className="absolute -bottom-36 -left-20 h-96 w-96 rounded-full border border-white/10 bg-white/5" />
+
+            <div className="relative flex items-center gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500 shadow-lg shadow-blue-900/15 transition-transform duration-300 hover:scale-105">
+                <CalendarCheck size={29} />
+              </div>
+              <div>
+                <h1 className="text-lg font-extrabold tracking-tight">Attendify</h1>
+                <p className="mt-1 text-sm text-blue-100">Workforce management made simple</p>
+              </div>
             </div>
-            <h1 className="text-2xl font-bold text-slate-900">Attendify</h1>
-            <p className="mt-2 text-sm text-slate-500">Sign in to your workforce dashboard</p>
-          </div>
-          <label htmlFor="login-email" className="mb-1 block text-sm font-medium text-slate-700">Email</label>
-          <input id="login-email" type="email" autoComplete="username" required value={loginEmail} onChange={e => setLoginEmail(e.target.value)} className="mb-4 w-full rounded-xl border border-slate-300 px-4 py-3" placeholder="you@example.com" />
-          <label htmlFor="login-password" className="mb-1 block text-sm font-medium text-slate-700">Password</label>
-          <input id="login-password" type="password" autoComplete="current-password" required value={loginPassword} onChange={e => setLoginPassword(e.target.value)} className="mb-4 w-full rounded-xl border border-slate-300 px-4 py-3" placeholder="Enter your password" />
-          {loginError && <p role="alert" className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{String(loginError)}</p>}
-          <button type="submit" disabled={loginLoading} className="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white disabled:opacity-60">
-            {loginLoading ? 'Signing in...' : 'Sign in'}
-          </button>
-        </form>
+
+            <div className="relative mt-6 max-w-xl xl:mt-8">
+              <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-blue-200">Your workspace, simplified</p>
+              <h2 className="text-3xl font-extrabold leading-tight xl:text-4xl">
+                Track attendance.<br />Empower your team.
+              </h2>
+              <p className="mt-1.5 max-w-lg text-[11px] leading-4 text-blue-100 xl:text-xs">
+                A smarter way to manage attendance, work hours and workforce productivity.
+              </p>
+            </div>
+
+            <div className="relative mt-5 space-y-3">
+              <div className="group flex items-center gap-3 rounded-xl px-2 py-1.5 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/10">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-400/20 text-teal-200 transition-transform duration-300 group-hover:scale-110"><UsersRound size={17} /></div>
+                <div><p className="font-semibold">Workforce at a glance</p><p className="mt-1 text-sm text-blue-100">Keep teams and attendance organized</p></div>
+              </div>
+              <div className="group flex items-center gap-3 rounded-xl px-2 py-1.5 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/10">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-400/20 text-violet-200 transition-transform duration-300 group-hover:scale-110"><ChartNoAxesCombined size={17} /></div>
+                <div><p className="font-semibold">Insights &amp; reports</p><p className="mt-1 text-sm text-blue-100">Understand attendance patterns</p></div>
+              </div>
+              <div className="group flex items-center gap-3 rounded-xl px-2 py-1.5 transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/10">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-400/20 text-amber-200 transition-transform duration-300 group-hover:scale-110"><ShieldCheck size={17} /></div>
+                <div><p className="font-semibold">Secure workspace</p><p className="mt-1 text-sm text-blue-100">Role-based access to your account</p></div>
+              </div>
+            </div>
+
+            <div className="relative mt-3 pt-1">
+              <div className="rounded-2xl border border-white/15 bg-white/10 p-2 backdrop-blur-sm">
+                <div className="flex items-center justify-between">
+                  <div><p className="text-sm text-blue-100">Built for your workday</p><p className="mt-1 text-lg font-semibold">One place for your team</p></div>
+                  <CalendarCheck size={28} className="text-blue-200" />
+                </div>
+                <div className="mt-5 flex h-12 items-end gap-2">
+                  {[35, 60, 43, 78, 54, 90, 66, 100, 72, 86, 48, 70].map((height, index) => (
+                    <div key={index} className="flex-1 origin-bottom rounded-t-md bg-gradient-to-t from-blue-300/40 to-white/90 transition-all duration-300 hover:brightness-110 hover:scale-y-110" style={{ height: `${height}%` }} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="flex w-full items-center justify-center py-2 lg:h-full lg:min-h-0 lg:py-0">
+            <form onSubmit={handleLogin} className="w-full max-w-lg rounded-3xl border border-white/80 bg-white/95 p-4 shadow-2xl shadow-slate-300/40 backdrop-blur-xl sm:p-5 xl:p-6">
+              <div className="mb-2 text-center">
+                <div className="mx-auto mb-1.5 flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-[#477df5] to-[#7164e8] text-white shadow-lg shadow-blue-600/25">
+                  <CalendarCheck size={22} />
+                </div>
+                <h1 className="text-lg font-extrabold tracking-tight text-slate-950 xl:text-xl">Welcome to Attendify</h1>
+                <p className="mt-1 text-xs text-slate-500 sm:text-sm">Sign in to access your workforce dashboard</p>
+              </div>
+
+              <div className="mb-3 grid grid-cols-2 gap-3" role="group" aria-label="Choose login view">
+                <button type="button" onClick={() => setLoginRole('admin')} aria-pressed={roleIsAdmin}
+                  className={`rounded-xl border p-3 text-left transition duration-200 focus:outline-none focus:ring-4 focus:ring-blue-100 ${roleIsAdmin ? 'border-blue-400 bg-[#f2f7ff] shadow-sm ring-1 ring-blue-400/15' : 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}`}>
+                  <span className={`mb-1.5 flex h-7 w-7 items-center justify-center rounded-lg ${roleIsAdmin ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'}`}><ShieldCheck size={21} /></span>
+                  <span className="block font-bold text-slate-900">Admin</span>
+                  <span className="mt-1 block text-xs leading-5 text-slate-500 sm:text-sm">Administrator access</span>
+                </button>
+                <button type="button" onClick={() => setLoginRole('employee')} aria-pressed={!roleIsAdmin}
+                  className={`rounded-xl border p-3 text-left transition duration-200 focus:outline-none focus:ring-4 focus:ring-blue-100 ${!roleIsAdmin ? 'border-blue-400 bg-[#f2f7ff] shadow-sm ring-1 ring-blue-400/15' : 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'}`}>
+                  <span className={`mb-1.5 flex h-7 w-7 items-center justify-center rounded-lg ${!roleIsAdmin ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600'}`}><UserRound size={21} /></span>
+                  <span className="block font-bold text-slate-900">Employee</span>
+                  <span className="mt-1 block text-xs leading-5 text-slate-500 sm:text-sm">Employee access</span>
+                </button>
+              </div>
+
+              <div className="mb-5">
+                <label htmlFor="login-email" className="mb-1 block text-sm font-semibold text-slate-700">Email address</label>
+                <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 transition focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10">
+                  <Mail size={19} className="shrink-0 text-slate-400" />
+                  <input id="login-email" type="email" autoComplete="username" required value={loginEmail} onChange={e => setLoginEmail(e.target.value)} className="min-w-0 w-full appearance-none border-0 !outline-none !ring-0 bg-transparent py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:!outline-none focus:!ring-0 focus-visible:!outline-none" placeholder="you@company.com" />
+                </div>
+              </div>
+
+              <div className="mb-5">
+                <label htmlFor="login-password" className="mb-1 block text-sm font-semibold text-slate-700">Password</label>
+                <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 transition focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10">
+                  <LockKeyhole size={19} className="shrink-0 text-slate-400" />
+                  <input id="login-password" type={showPassword ? 'text' : 'password'} autoComplete="current-password" required value={loginPassword} onChange={e => setLoginPassword(e.target.value)} className="min-w-0 w-full appearance-none border-0 !outline-none !ring-0 bg-transparent py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:!outline-none focus:!ring-0 focus-visible:!outline-none" placeholder="Enter your password" />
+                  <button type="button" onClick={() => setShowPassword(value => !value)} className="shrink-0 rounded-lg p-1 text-slate-400 hover:text-slate-700" aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                    {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="mb-3 flex items-center justify-between gap-3 text-xs sm:text-sm">
+                <label className="flex items-center gap-2 text-slate-500"><input type="checkbox" className="h-4 w-4 rounded border-slate-300 accent-blue-600" />Keep me signed in</label>
+                <span className="text-slate-400">Secure sign-in</span>
+              </div>
+
+              {loginError && <p role="alert" className="mb-5 rounded-xl border border-red-100 bg-red-50 p-3.5 text-sm leading-5 text-red-700">{String(loginError)}</p>}
+
+              <button type="submit" disabled={loginLoading} className="group flex w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-[#477df5] to-[#7164e8] px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-600/20 transition hover:-translate-y-0.5 hover:from-[#386ce0] hover:to-[#6255d6] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-60">
+                {loginLoading ? 'Signing in...' : `Sign in as ${roleIsAdmin ? 'Admin' : 'Employee'}`}
+                {!loginLoading && <ArrowRight size={19} className="transition group-hover:translate-x-1" />}
+              </button>
+
+              <div className="mt-2 flex items-center gap-2 text-[10px] text-slate-400">
+                <span className="h-px flex-1 bg-slate-200" /><span>Secure access to your workspace</span><span className="h-px flex-1 bg-slate-200" />
+              </div>
+            </form>
+          </section>
+        </div>
       </div>
     )
   }
